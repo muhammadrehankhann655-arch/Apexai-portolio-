@@ -1,0 +1,77 @@
+# ==========================================================
+# PROJECT: NETRAVA AI - SMART MIDDLEWARE GATEWAY
+# OWNER: [TERA NAAM YAHAN LIKH DE]
+# PURPOSE: REDUCE CLOUD API COST & OFFLINE PROCESSING
+# ==========================================================
+
+import time
+import re
+
+class NetravaEngine:
+    def __init__(self):
+        # Database for automatic offline responses
+        self.brain = {
+            "GREETING": {
+                "keys": ["hello", "hi", "hey", "hlo", "hey", "namaste"],
+                "reply": "Arre bhai hello! Netrava AI yahan hai. Batao kya help karun?"
+            },
+            "STATUS": {
+                "keys": ["kaise ho", "how are you", "kya chal raha", "thik ho"],
+                "reply": "Main ekdum jhakaas hoon! Aap batao aapka din kaisa hai?"
+            },
+            "IDENTITY": {
+                "keys": ["who are you", "naam kya hai", "tera naam", "kaun ho"],
+                "reply": "Main hoon Netrava, tera personal offline AI assistant!"
+            }
+        }
+
+    def solve_math(self, query):
+        # Math Sawal solve karne ka logic (Automatic)
+        # Regex se numbers aur operators (+, -, *, /) nikalta hai
+        clean_query = re.sub(r'[^0-9+\-*/.]', '', query)
+        if clean_query:
+            try:
+                result = eval(clean_query) # Basic math calculation
+                return f"Math Result: {result}", "MATHEMATICS"
+            except:
+                return None, None
+        return None, None
+
+    def process_query(self, user_input):
+        start_time = time.perf_counter()
+        query = user_input.lower().strip()
+        
+        # 1. Pehle Check Karo Math Hai Kya?
+        math_res, cat = self.solve_math(query)
+        if math_res:
+            end_time = time.perf_counter()
+            return math_res, cat, (end_time - start_time), "LOCAL"
+
+        # 2. Phir Check Karo Chat/Greetings Hai Kya?
+        for category, data in self.brain.items():
+            for key in data["keys"]:
+                if key in query:
+                    end_time = time.perf_counter()
+                    return data["reply"], category, (end_time - start_time), "LOCAL"
+
+        # 3. Agar Kuch Samajh Na Aaye Toh Cloud Par Bhejo
+        end_time = time.perf_counter()
+        return "Sending to Cloud AI...", "COMPLEX_QUERY", (end_time - start_time), "EXTERNAL_CLOUD"
+
+# --- EXECUTION ---
+netrava = NetravaEngine()
+print("--- Netrava AI v60: Business Ready Model ---")
+print("Owner: [Tera Naam]")
+
+while True:
+    user_msg = input("\nUser: ")
+    if user_msg.lower() in ["exit", "stop", "band"]: break
+
+    ans, category, speed, route = netrava.process_query(user_msg)
+
+    print(f"🤖 Response: {ans}")
+    print(f"📂 Category: {category}")
+    print(f"🛤️ Route: {route}")
+    print(f"⏱️ Speed: {speed:.6f}s")
+    if route == "LOCAL":
+        print("💰 Saving: ₹1.50 (No Cloud API used)")
